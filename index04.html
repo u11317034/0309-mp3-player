@@ -1,0 +1,311 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+  <meta charset="UTF-8">
+  <title>Neon DJ Deck Pro - Discrete Edition</title>
+  <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700&family=Noto+Sans+TC:wght@300;500;700&display=swap" rel="stylesheet">
+  <style>
+    :root {
+      --neon-pink: #ff007f;
+      --deep-pink: #4a0025;
+      --bg-black: #050505;
+      --panel-gray: #121214;
+      --metal-border: #2a2a2e;
+    }
+
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    
+    body {
+      background: var(--bg-black);
+      color: #fff;
+      font-family: 'Noto Sans TC', sans-serif;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      min-height: 100vh;
+      background-image: radial-gradient(#1a1a1d 1px, transparent 1px);
+      background-size: 25px 25px;
+    }
+
+    .dj-controller {
+      display: grid;
+      grid-template-columns: 180px 1fr 280px;
+      gap: 20px;
+      width: 1000px;
+      background: var(--panel-gray);
+      padding: 30px;
+      border-radius: 20px;
+      border: 3px solid var(--metal-border);
+      box-shadow: 0 0 40px rgba(255, 0, 127, 0.15);
+    }
+
+    /* 使用說明書 */
+    .user-manual {
+      grid-column: 1 / span 3;
+      background: rgba(255, 0, 127, 0.05);
+      border: 1px solid var(--neon-pink);
+      padding: 15px;
+      border-radius: 10px;
+      margin-bottom: 20px;
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      gap: 10px;
+      font-size: 12px;
+      color: #ffb3d9;
+    }
+    .manual-item b { color: var(--neon-pink); display: block; margin-bottom: 2px; }
+
+    .section-title {
+      font-size: 10px;
+      letter-spacing: 2px;
+      color: #555;
+      text-transform: uppercase;
+      margin-bottom: 12px;
+      text-align: center;
+      border-bottom: 1px solid #222;
+      padding-bottom: 4px;
+    }
+
+    /* --- 左舷：動力區 (連續) --- */
+    .power-deck {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      background: #000;
+      padding: 20px 10px;
+      border-radius: 15px;
+    }
+    .v-slider-wrap { height: 200px; width: 40px; position: relative; }
+    #playSlider {
+      -webkit-appearance: none; width: 200px; height: 4px; background: #1a1a1a;
+      position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%) rotate(-90deg);
+    }
+    #playSlider::-webkit-slider-thumb {
+      -webkit-appearance: none; width: 40px; height: 24px; background: #222;
+      border: 2px solid var(--neon-pink); border-radius: 3px; box-shadow: 0 0 10px var(--neon-pink);
+    }
+
+    /* --- 中控：混音與離散進度區 --- */
+    .mixer-deck { display: flex; flex-direction: column; gap: 15px; }
+    #canvas { width: 100%; height: 100px; background: #000; border-radius: 8px; border: 1px solid #222; }
+    
+    /* 離散進度墊樣式 */
+    .progress-pads {
+      display: grid;
+      grid-template-columns: repeat(8, 1fr);
+      gap: 8px;
+      margin-top: 10px;
+    }
+    .pad {
+      height: 45px;
+      background: #0a0a0a;
+      border: 1px solid #333;
+      border-radius: 4px;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-family: 'Orbitron', sans-serif;
+      font-size: 10px;
+      color: #444;
+      transition: 0.2s;
+    }
+    .pad.active {
+      background: var(--deep-pink);
+      border-color: var(--neon-pink);
+      color: #fff;
+      box-shadow: 0 0 15px var(--neon-pink), inset 0 0 10px var(--neon-pink);
+    }
+
+    .discrete-controls { display: grid; grid-template-columns: 1fr 1fr; gap: 15px; }
+    .btn-group { display: grid; grid-template-columns: repeat(5, 1fr); gap: 4px; }
+    .step-btn { background: #111; border: 1px solid #333; color: #666; padding: 10px 0; font-size: 10px; cursor: pointer; }
+    .step-btn.active { background: var(--deep-pink); color: #fff; border-color: var(--neon-pink); }
+
+    /* --- 右舷：轉盤區 (連續) --- */
+    .jog-deck { background: #000; padding: 20px; border-radius: 15px; display: flex; flex-direction: column; align-items: center; }
+    #jogWheel {
+      width: 180px; height: 180px; border-radius: 50%;
+      background: radial-gradient(#222, #050505); border: 6px solid #1a1a1a;
+      position: relative; cursor: grab; margin-bottom: 15px;
+    }
+    #jogWheel::after { content: ""; position: absolute; top: 10px; width: 8px; height: 8px; background: var(--neon-pink); border-radius: 50%; box-shadow: 0 0 8px var(--neon-pink); }
+    .time-display { font-family: 'Orbitron', sans-serif; font-size: 28px; color: var(--neon-pink); text-shadow: 0 0 10px var(--neon-pink); }
+
+    .file-btn { border: 1px solid var(--neon-pink); color: var(--neon-pink); padding: 5px 15px; border-radius: 4px; cursor: pointer; font-size: 11px; }
+    input[type="file"] { display: none; }
+  </style>
+</head>
+<body>
+
+<div class="dj-controller">
+  <div class="user-manual">
+    <div class="manual-item"><b>① 載入音軌</b> 點擊右方按鈕讀取檔案。</div>
+    <div class="manual-item"><b>② 動力觸發(連續)</b> 將左側推桿往上滑動播放音樂。</div>
+    <div class="manual-item"><b>③ 進度跳轉(離散)</b> 點擊下方 1-8 號墊片跳轉分段。</div>
+    <div class="manual-item"><b>④ 微調搜尋(連續)</b> 旋轉右方大轉盤進行精確定位。</div>
+  </div>
+
+  <div class="power-deck">
+    <div class="section-title">Power Fader</div>
+    <div class="v-slider-wrap"><input type="range" id="playSlider" min="0" max="100" value="0"></div>
+  </div>
+
+  <div class="mixer-deck">
+    <div style="display:flex; justify-content:space-between; align-items:center;">
+      <span id="nowPlaying" style="font-size:11px; color:#666;">READY...</span>
+      <label for="fileInput" class="file-btn">LOAD MP3</label>
+      <input type="file" id="fileInput" accept="audio/mp3">
+    </div>
+
+    <canvas id="canvas"></canvas>
+
+    <div class="section-title">Progress Segments (Discrete)</div>
+    <div class="progress-pads" id="progressPads">
+      <div class="pad" data-pct="0">1</div>
+      <div class="pad" data-pct="0.125">2</div>
+      <div class="pad" data-pct="0.25">3</div>
+      <div class="pad" data-pct="0.375">4</div>
+      <div class="pad" data-pct="0.5">5</div>
+      <div class="pad" data-pct="0.625">6</div>
+      <div class="pad" data-pct="0.75">7</div>
+      <div class="pad" data-pct="0.875">8</div>
+    </div>
+
+    <div class="discrete-controls">
+      <div>
+        <div class="section-title">音量檔位</div>
+        <div class="btn-group">
+          <button class="step-btn vol-btn" data-val="0">MUTE</button>
+          <button class="step-btn vol-btn" data-val="0.25">25</button>
+          <button class="step-btn vol-btn active" data-val="0.5">50</button>
+          <button class="step-btn vol-btn" data-val="0.75">75</button>
+          <button class="step-btn vol-btn" data-val="1">MAX</button>
+        </div>
+      </div>
+      <div>
+        <div class="section-title">速度倍率</div>
+        <div class="btn-group">
+          <button class="step-btn spd-btn" data-val="0.5">0.5</button>
+          <button class="step-btn spd-btn active" data-val="1">1.0</button>
+          <button class="step-btn spd-btn" data-val="1.5">1.5</button>
+          <button class="step-btn spd-btn" data-val="2">2.0</button>
+          <button class="step-btn spd-btn" data-val="3">3.0</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="jog-deck">
+    <div class="section-title">Jog Wheel</div>
+    <div id="jogWheel"></div>
+    <div class="time-display" id="timeDisplay">00:00</div>
+  </div>
+</div>
+
+<audio id="audio"></audio>
+
+<script>
+  const audio = document.getElementById('audio');
+  const canvas = document.getElementById('canvas');
+  const ctx = canvas.getContext('2d');
+  const playSlider = document.getElementById('playSlider');
+  const timeDisplay = document.getElementById('timeDisplay');
+  const fileInput = document.getElementById('fileInput');
+  const pads = document.querySelectorAll('.pad');
+
+  let audioCtx, analyser, dataArray;
+
+  // 1. 檔案載入
+  fileInput.addEventListener('change', (e) => {
+    const file = e.target.files[0];
+    if (file) {
+      document.getElementById('nowPlaying').innerText = file.name;
+      audio.src = URL.createObjectURL(file);
+    }
+  });
+
+  // 2. 離散進度控制邏輯
+  pads.forEach(pad => {
+    pad.addEventListener('click', () => {
+      if (!audio.src) return;
+      const targetTime = audio.duration * parseFloat(pad.dataset.pct);
+      audio.currentTime = targetTime;
+      updatePadUI();
+    });
+  });
+
+  function updatePadUI() {
+    const progress = audio.currentTime / audio.duration;
+    pads.forEach((pad, index) => {
+      const pct = parseFloat(pad.dataset.pct);
+      const nextPct = pads[index+1] ? parseFloat(pads[index+1].dataset.pct) : 1;
+      
+      if (progress >= pct && progress < nextPct) {
+        pad.classList.add('active');
+      } else {
+        pad.classList.remove('active');
+      }
+    });
+  }
+
+  // 3. 頻譜繪製
+  function draw() {
+    requestAnimationFrame(draw);
+    if (!analyser) return;
+    analyser.getByteFrequencyData(dataArray);
+    ctx.fillStyle = '#000';
+    ctx.fillRect(0, 0, canvas.width, canvas.height);
+    const bw = (canvas.width / dataArray.length) * 2;
+    dataArray.forEach((v, i) => {
+      const h = (v / 255) * canvas.height;
+      ctx.fillStyle = `hsl(330, 100%, ${30 + (v/255)*50}%)`;
+      ctx.fillRect(i * bw, canvas.height - h, bw - 1, h);
+    });
+  }
+
+  // 4. 連續控制：動力與轉盤
+  playSlider.addEventListener('input', () => {
+    if (!audioCtx) {
+      audioCtx = new AudioContext();
+      analyser = audioCtx.createAnalyser();
+      const source = audioCtx.createMediaElementSource(audio);
+      source.connect(analyser);
+      analyser.connect(audioCtx.destination);
+      dataArray = new Uint8Array(analyser.frequencyBinCount);
+      draw();
+    }
+    if (playSlider.value > 80) audio.play();
+    else if (playSlider.value < 20) audio.pause();
+  });
+
+  let isDragging = false, lastX = 0;
+  document.getElementById('jogWheel').addEventListener('mousedown', e => { isDragging = true; lastX = e.clientX; });
+  window.addEventListener('mousemove', e => {
+    if (!isDragging || !audio.src) return;
+    const dx = e.clientX - lastX;
+    audio.currentTime += dx * 0.2;
+    lastX = e.clientX;
+    document.getElementById('jogWheel').style.transform = `rotate(${audio.currentTime * 30}deg)`;
+  });
+  window.addEventListener('mouseup', () => isDragging = false);
+
+  // 離散按鈕
+  document.querySelectorAll('.vol-btn, .spd-btn').forEach(btn => {
+    btn.addEventListener('click', () => {
+      const group = btn.classList.contains('vol-btn') ? '.vol-btn' : '.spd-btn';
+      document.querySelectorAll(group).forEach(b => b.classList.remove('active'));
+      btn.classList.add('active');
+      if (group === '.vol-btn') audio.volume = btn.dataset.val;
+      else audio.playbackRate = btn.dataset.val;
+    });
+  });
+
+  audio.addEventListener('timeupdate', () => {
+    const m = Math.floor(audio.currentTime / 60), s = Math.floor(audio.currentTime % 60);
+    timeDisplay.innerText = `${m.toString().padStart(2,'0')}:${s.toString().padStart(2,'0')}`;
+    updatePadUI();
+  });
+</script>
+</body>
+</html>
